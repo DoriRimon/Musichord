@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.dorir.musichord_pac">
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:allowBackup="false"
+        tools:replace="android:allowBackup"
+        android:icon="@drawable/app_symbol_updated"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name="com.example.dorir.musichord_pac.UnderConstruction"
+            android:screenOrientation="portrait" />
+        <activity android:name="com.example.dorir.musichord_pac.UkuleleChordNamer"
+            android:screenOrientation="portrait" />
+        <activity android:name="com.example.dorir.musichord_pac.GuitarListData"
+            android:screenOrientation="portrait" />
+        <activity android:name="com.example.dorir.musichord_pac.UkuleleListData"
+            android:screenOrientation="portrait" />
+        <activity android:name="com.example.dorir.musichord_pac.GuitarChordNamer"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.example.dorir.musichord_pac.Intro"
+            android:label="app_intro"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.example.dorir.musichord_pac.Menu"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name="com.example.dorir.musichord_pac.BackgroundSoundService"
+            android:enabled="true" />
+        <receiver android:name="com.example.dorir.musichord_pac.Broadcast" />
+    </application>
+
+</manifest>

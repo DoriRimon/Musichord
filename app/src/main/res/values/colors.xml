@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#79ABC8</color>
+    <color name="colorPrimaryDark">#4856AA</color>
+    <color name="colorAccent">#79ABC8</color>
+    <color name="s1_bg_color">#FFFFFF</color>
+    <color name="s1_text_color">#79ABC8</color>
+    <color name="s2_bg_color">#79ABC8</color>
+    <color name="s2_text_color">#FFFFFF</color>
+    <color name="s3_bg_color">#5587AC</color>
+    <color name="s4_bg_color">#3D708B</color>
+    <color name="s5_bg_color">#315B72</color>
+    <color name="dark_theme_bg">#3D4150</color>
+    <color name="trans">#00000000</color>
+</resources>

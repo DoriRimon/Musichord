@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/guitar_selector"
+        android:title="Guitar"
+        android:icon="@drawable/guitarb" />
+
+    <item
+        android:id="@+id/ukulele_selector"
+        android:title="Ukulele"
+        android:icon="@drawable/ukuleleb"/>
+
+    <item
+        android:id="@+id/piano_selector"
+        android:title="Piano"
+        android:icon="@drawable/pianob"/>
+
+</menu>

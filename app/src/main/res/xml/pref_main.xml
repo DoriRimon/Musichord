@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="General">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_theme"
+            android:summary="@string/summary_theme"
+            android:title="@string/title_theme" />
+
+
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="@string/title_guitar_tuning"
+            android:entries="@array/guitar_tunings_entries"
+            android:entryValues="@array/guitar_tunings_values"
+            android:key="@string/key_guitar_tuning"
+            android:summary="@string/summary_choose_guitar_tuning"
+            android:title="@string/title_guitar_tuning" />
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Sounds and vibration">
+        <ListPreference
+            android:defaultValue="0"
+            android:dialogTitle="@string/title_music"
+            android:entries="@array/music_entries"
+            android:entryValues="@array/music_values"
+            android:key="@string/key_music"
+            android:summary="@string/summary_choose_music"
+            android:title="@string/title_music" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="@string/key_vibrate"
+            android:summary="@string/summary_vibrate"
+            android:title="@string/title_vibrate" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_header_about">
+
+        <Preference
+            android:selectable="false"
+            android:summary="@string/summary_about" />
+
+        <Preference
+            android:summary="@string/app_version"
+            android:title="@string/title_version" />
+    </PreferenceCategory>
+</PreferenceScreen>
