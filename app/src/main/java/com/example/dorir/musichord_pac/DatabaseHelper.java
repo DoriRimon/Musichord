@@ -15,83 +15,62 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DatabaseHelper";
 
     // The name of the guitar table
-    private static final String GUITAR_TABLE_NAME = "guitarChords";
+    private static final String TABLE_NAME = "chords";
 
-    // The name of the ukulele chord namer
-    private static final String UKE_TABLE_NAME = "ukeChords";
+    // The first column - type
+    private static final String COL0 = "chordType";
 
-    // The first column - names
-    private static final String COL0 = "chordName";
+    // The second column - names
+    private static final String COL1 = "chordName";
 
-    // The second column - pictures
-    private static final String COL1 = "chordPic";
+    // The third column - pictures
+    private static final String COL2 = "chordPic";
 
     public DatabaseHelper(@Nullable Context context) {
-        super(context, GUITAR_TABLE_NAME, null, 1);
+        super(context, TABLE_NAME, null, 1);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         // Creating the guitar table
-        String createGuitarTable = "CREATE TABLE " + GUITAR_TABLE_NAME + " (" + COL0 + " TEXT," + COL1 + " BLOB" + ")";
+        String createTable = "CREATE TABLE " + TABLE_NAME + " (" + COL0 + " INTEGER," + COL1 + " TEXT," + COL2 + " BLOB" + ")";
 
-        // Creating the ukulele table
-        String createUkeTable = "CREATE TABLE " + UKE_TABLE_NAME + " (" + COL0 + " TEXT," + COL1 + " BLOB" + ")";
-
-        db.execSQL(createGuitarTable);
-        db.execSQL(createUkeTable);
+        db.execSQL(createTable);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-        db.execSQL("DROP TABLE IF EXISTS " + GUITAR_TABLE_NAME);
-        db.execSQL("DROP TABLE IF EXISTS " + UKE_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         onCreate(db);
     }
 
     public boolean addData(String item, byte[] image, String instrument){
-        if (instrument.equals("guitar")) {
-            SQLiteDatabase db = this.getWritableDatabase();
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(COL0, item);
-            contentValues.put(COL1, image);
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        if (instrument.equals("guitar"))
+            contentValues.put(COL0, 0);
+        if (instrument.equals("ukulele"))
+            contentValues.put(COL0, 1);
+        contentValues.put(COL1, item);
+        contentValues.put(COL2, image);
 
-            Log.d(TAG, "addData: Adding " + item + " to " + GUITAR_TABLE_NAME);
+        Log.d(TAG, "addData: Adding " + item + " to " + TABLE_NAME);
 
-            long result = db.insert(GUITAR_TABLE_NAME, null, contentValues);
-            if (result == -1)
-                return false;
-            return true;
-        }
-        if (instrument.equals("uke")){
-            SQLiteDatabase db = this.getWritableDatabase();
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(COL0, item);
-            contentValues.put(COL1, image);
-
-            Log.d(TAG, "addData: Adding " + item + " to " + UKE_TABLE_NAME);
-
-            long result = db.insert(UKE_TABLE_NAME, null, contentValues);
-            if (result == -1)
-                return false;
-            return true;
-        }
+        long result = db.insert(TABLE_NAME, null, contentValues);
+        if (result == -1)
+            return false;
         return true;
     }
 
     public Cursor getData(String instrument){
-        if (instrument.equals("guitar")) {
-            SQLiteDatabase db = this.getWritableDatabase();
-            String query = "SELECT * FROM " + GUITAR_TABLE_NAME;
-            Cursor data = db.rawQuery(query, null);
-            return data;
-        }
-        if (instrument.equals("uke")){
-            SQLiteDatabase db = this.getWritableDatabase();
-            String query = "SELECT * FROM " + UKE_TABLE_NAME;
-            Cursor data = db.rawQuery(query, null);
-            return data;
-        }
-        return null;
+        int x = -1;
+        if (instrument.equals("guitar"))
+            x = 0;
+        if (instrument.equals("ukulele"))
+            x = 1;
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL0 + "= " + x;
+        Cursor data = db.rawQuery(query, null);
+        return data;
     }
 }

@@ -11,10 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
-public class GuitarListData extends AppCompatActivity {
+public class LastSearched extends AppCompatActivity {
 
 
     private static final String TAG = "GuitarListData";
+    private String instrument;
 
     // The database
     DatabaseHelper mdb;
@@ -28,6 +29,7 @@ public class GuitarListData extends AppCompatActivity {
         setContentView(R.layout.list_layout_activity);
         lv = findViewById(R.id.listView);
         mdb = new DatabaseHelper(this);
+        instrument = getIntent().getStringExtra("instrument");
 
         populateListView();
     }
@@ -36,7 +38,7 @@ public class GuitarListData extends AppCompatActivity {
         Log.d(TAG, "populateListView: Displaying Data in the ListView");
 
         // Getting the data form the guitar table
-        Cursor data = mdb.getData("guitar");
+        Cursor data = mdb.getData(instrument);
 
         // List for the names
         ArrayList<String> listDataNames = new ArrayList<>();
@@ -44,8 +46,8 @@ public class GuitarListData extends AppCompatActivity {
         // List for the images
         ArrayList<byte[]> listDataImages = new ArrayList<>();
         while (data.moveToNext()){
-            listDataNames.add(data.getString(0));
-            listDataImages.add(data.getBlob(1));
+            listDataNames.add(data.getString(1));
+            listDataImages.add(data.getBlob(2));
         }
 
         // We want only the last 10 chords

@@ -16,11 +16,7 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name="com.example.dorir.musichord_pac.UnderConstruction"
             android:screenOrientation="portrait" />
-        <activity android:name="com.example.dorir.musichord_pac.UkuleleChordNamer"
-            android:screenOrientation="portrait" />
-        <activity android:name="com.example.dorir.musichord_pac.GuitarListData"
-            android:screenOrientation="portrait" />
-        <activity android:name="com.example.dorir.musichord_pac.UkuleleListData"
+        <activity android:name="com.example.dorir.musichord_pac.LastSearched"
             android:screenOrientation="portrait" />
         <activity android:name="com.example.dorir.musichord_pac.GuitarChordNamer"
             android:screenOrientation="portrait" />

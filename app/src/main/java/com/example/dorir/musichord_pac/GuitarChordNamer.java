@@ -46,20 +46,28 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
     // The standard guitar tuning by the number format I created
     private double[] guitarTuning = new double[] {4.5, 1, 3.5, 6, 2, 4.5};
 
+    // The standard ukulele tuning by the number format I created
+    private double[] ukuleleTuning = new double[] {6, 2.5, 4.5, 1};
+
     // Contains the A major scale values (in a number format I created)
     private final double[] originalScale = new double[] { 1.0, 2.0, 3.0, 3.5, 4.5, 5.5, 6.5 };
 
     // All music notes names
     private String[] roots = new String[] {"A", "Bb", "B", "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab"};
 
+    // Instruments names
+    private String[] instruments = new String[] {"guitar", "ukulele", "piano"};
+
     // Values of the notes written above (in the format I mentioned earlier)
     private double[] rootsVal = new double[] {1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5};
 
-    // The values of the guitar section that is relevant at the moment
-    private double[][] diagram = new double[6][6];
+    // The values of the section that is relevant at the moment
+    private double[][] guitarDiagram = new double[6][6];
+    private double[][] ukuleleDiagram = new double[6][4];
 
     // The values of the notes selected
-    private double[] choices = new double[] {0, 0, 0, 0, 0, 0};
+    private double[] guitarChoices = new double[] {0, 0, 0, 0, 0, 0};
+    private double[] ukuleleChoices = new double[] {0, 0, 0, 0};
 
     // An EditText that lets the user to choose the fret he's on
     private EditText fret;
@@ -103,6 +111,9 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
 
     // The Buttons Navigator at the bottom of the screen
     private BottomNavigationView bottomNavigationView;
+
+    // Current chord
+    private String current = instruments[0]; // Guitar
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,38 +177,32 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
             music.setChecked(true);
     }
 
-    BottomNavigationView.OnNavigationItemSelectedListener select = new BottomNavigationView.OnNavigationItemSelectedListener() {
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-            switch (menuItem.getItemId()){
-                case R.id.guitar_selector:
-                    return true;
-                case R.id.ukulele_selector:
-                    openUke();
-                    return true;
-                case R.id.piano_selector:
-                    return true;
-            }
-            return false;
+    BottomNavigationView.OnNavigationItemSelectedListener select = menuItem -> {
+        switch (menuItem.getItemId()){
+            case R.id.guitar_selector:
+                setGuitarScreen();
+                return true;
+            case R.id.ukulele_selector:
+                setUkuleleScreen();
+                return true;
+            case R.id.piano_selector:
+                return true;
         }
+        return false;
     };
 
     // On checked change listener
-    CompoundButton.OnCheckedChangeListener checked = new CompoundButton.OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton cb, boolean b) {
-            switch (cb.getId()){
-                case R.id.music_dialog:
-                    if (b) {
-                        Intent svc = new Intent(GuitarChordNamer.this, BackgroundSoundService.class);
-                        startService(svc);
-                    }
-                    else{
-                        Intent svc = new Intent(GuitarChordNamer.this, BackgroundSoundService.class);
-                        stopService(svc);
-                    }
-                    break;
-            }
+    CompoundButton.OnCheckedChangeListener checked = (cb, b) -> {
+        switch (cb.getId()){
+            case R.id.music_dialog:
+                Intent svc = new Intent(GuitarChordNamer.this, BackgroundSoundService.class);
+                if (b) {
+                    startService(svc);
+                }
+                else{
+                    stopService(svc);
+                }
+                break;
         }
     };
 
@@ -217,13 +222,14 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.go2:
-                namePrint();
+                guitarNamePrint();
                 break;
             case R.id.last_searched_dialog:
                 dialog.dismiss();
                 openLastSearched();
                 break;
             case R.id.options:
+            case R.id.options2:
                 // ----- Move the dialog to be under the options button -----
                 Window window = dialog.getWindow();
                 WindowManager.LayoutParams wlp = window.getAttributes();
@@ -238,6 +244,9 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
             case R.id.settings_dialog:
                 openUnderConstruction();
                 break;
+            case R.id.go3:
+                ukuleleNamePrint();
+                break;
         }
     }
 
@@ -247,9 +256,10 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
             case R.id.instrument2:
                 switch (pos){
                     case 0: // guitar
+                        setGuitarScreen();
                         break;
                     case 1: // ukulele
-                        openUke();
+                        setUkuleleScreen();
                         break;
                     case 2: // piano
                         break;
@@ -264,7 +274,7 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
 
     // Add data to the database
     public void addData(String name, byte[] image){
-        mdb.addData(name, image, "guitar");
+        mdb.addData(name, image, current);
     }
 
     // Controls the back button (navigates to the menu page)
@@ -275,29 +285,54 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
     }
 
     // Fills the diagram with the notes values
-    public void diagramFill(int fret){
+    public void guitarDiagramFill(int fret){
         for (int j = 0; j < 6; j++)
-            diagram[0][j] = guitarTuning[j] + fret * 0.5;
+            guitarDiagram[0][j] = guitarTuning[j] + fret * 0.5;
         for (int i = 1; i < 6; i++) {
             for (int j = 0; j < 6; j++)
-                diagram[i][j] = diagram[i - 1][j] + 0.5;
+                guitarDiagram[i][j] = guitarDiagram[i - 1][j] + 0.5;
+        }
+    }
+
+    public void ukuleleDiagramFill(int fret){
+        for (int j = 0; j < 4; j++)
+            ukuleleDiagram[0][j] = ukuleleTuning[j] + fret * 0.5;
+        for (int i = 1; i < 6; i++) {
+            for (int j = 0; j < 4; j++)
+                ukuleleDiagram[i][j] = ukuleleDiagram[i - 1][j] + 0.5;
         }
     }
 
     // Fills choices with the values from the radio buttons
-    public void choicesFill(){
+    public void guitarChoicesFill(){
         for(int i = 0; i < groups.length; i++){
             RadioGroup rg = groups[i];
             int selectedId = rg.getCheckedRadioButtonId();
-            RadioButton rb = findViewById(selectedId);
             for(int j = 0; j < rg.getChildCount(); j++){
                 RadioButton r = (RadioButton)rg.getChildAt(j);
                 boolean flag = r.isChecked();
                 if(flag) {
                     if(j == 0)
-                        choices[i] = 0;
+                        guitarChoices[i] = 0;
                     else
-                        choices[i] = diagram[j-1][i];
+                        guitarChoices[i] = guitarDiagram[j-1][i];
+                }
+            }
+        }
+    }
+
+    public void ukuleleChoicesFill(){
+        for(int i = 0; i < groups.length; i++){
+            RadioGroup rg = groups[i];
+            int selectedId = rg.getCheckedRadioButtonId();
+            for(int j = 0; j < rg.getChildCount(); j++){
+                RadioButton r = (RadioButton)rg.getChildAt(j);
+                boolean flag = r.isChecked();
+                if(flag) {
+                    if(j == 0)
+                        ukuleleChoices[i] = 0;
+                    else
+                        ukuleleChoices[i] = ukuleleDiagram[j-1][i];
                 }
             }
         }
@@ -305,19 +340,32 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
 
     // Checks all permutes of an array
     // *This function is used to see all the permutes of a chord*
-    public void permutes(double[] arr, int k, double root, double baseNote){
-        //Toast.makeText(this, "Entered Permutes", Toast.LENGTH_SHORT).show();
+    public void guitarPermutes(double[] arr, int k, double root, double baseNote){
         for(int i = k; i < arr.length; i++){
             swap(arr, i, k);
-            permutes(arr, k+1, root, baseNote);
+            guitarPermutes(arr, k+1, root, baseNote);
             swap(arr, k, i);
         }
         if(k == arr.length - 1) {
-            //Toast.makeText(this, "Called mapSearch on: " + Arrays.toString(arr), Toast.LENGTH_SHORT).show();
             String type = mapSearch(arr);
             if(!type.equals("none")) {
                 flag = true;
-                revealName(type, root, baseNote);
+                guitarRevealName(type, root, baseNote);
+            }
+        }
+    }
+
+    public void ukulelePermutes(double[] arr, int k, double root){
+        for(int i = k; i < arr.length; i++){
+            swap(arr, i, k);
+            ukulelePermutes(arr, k+1, root);
+            swap(arr, k, i);
+        }
+        if(k == arr.length - 1) {
+            String type = mapSearch(arr);
+            if(!type.equals("none")) {
+                ukuleleRevealName(type, root);
+                flag = true;
             }
         }
     }
@@ -341,11 +389,21 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
 
     // Creates a clean chord form the input
     // --> without repeats and at the correct size
-    public double[] actualChord(){
+    public double[] actualChord(String instrument){
         int f = Integer.parseInt(fret.getText().toString());
-        diagramFill(f);
-        choicesFill();
-        //Toast.makeText(this, "Choices: " + Arrays.toString(choices), Toast.LENGTH_SHORT).show();
+        double[] choices = new double[]{};
+        if (instrument.equals(instruments[0])) { //Guitar
+            guitarDiagramFill(f);
+            guitarChoicesFill();
+            choices = guitarChoices;
+        }
+        if (instrument.equals(instruments[1])) { // Ukulele
+            ukuleleDiagramFill(f);
+            ukuleleChoicesFill();
+            choices = ukuleleChoices;
+
+        }
+
         int count = 0;
         for (int i = 0; i < choices.length; i++) {
             if (choices[i] != 0)
@@ -365,8 +423,8 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
     }
 
     // Checks if the chord is valid
-    public void namePrint() {
-        double[] chord = actualChord();
+    public void guitarNamePrint() {
+        double[] chord = actualChord(instruments[0]); // Guitar
         flag = false;
         double root;
         double baseNote;
@@ -379,17 +437,35 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
             return;
         }
 
-        for (int i = 0; i < chord.length; i++){
+        for (double v : chord) {
             if (!flag) {
                 double[] slice = Arrays.copyOfRange(chord, 1, chord.length);
-                permutes(osc(slice, root), 0, root, baseNote);
+                guitarPermutes(osc(slice, root), 0, root, baseNote);
             }
             if (!flag) {
-                root = chord[i];
-                permutes(osc(chord, root), 0, root, baseNote);
+                root = v;
+                guitarPermutes(osc(chord, root), 0, root, baseNote);
             }
         }
 
+        if (!flag)
+            vibrate();
+    }
+
+    public void ukuleleNamePrint() {
+        double[] chord = actualChord(instruments[1]); // Ukulele
+        flag = false;
+        double root;
+        if (chord.length != 0) {
+            for (double v : chord) {
+                root = v;
+                ukulelePermutes(osc(chord, root), 0, root);
+            }
+        }
+        else{
+            vibrate();
+            return;
+        }
         if (!flag)
             vibrate();
     }
@@ -425,8 +501,10 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
         for (int i = 0; i < arr.length; i++){
             flag = true;
             for (int j = 0; j < i; j++){
-                if (arr[j] == arr[i])
+                if (arr[j] == arr[i]) {
                     flag = false;
+                    break;
+                }
             }
             if (flag)
                 res[i] = arr[i];
@@ -436,8 +514,7 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
     }
 
     // The actual print of the name to the screen
-    public void revealName(String type, double root, double baseNote){
-        //Toast.makeText(this, "Entered revealName", Toast.LENGTH_SHORT).show();
+    public void guitarRevealName(String type, double root, double baseNote){
         String s = "";
         int p = 0;
         for(int i = 0; i < rootsVal.length; i++){
@@ -454,6 +531,24 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
             }
             s += "/" + roots[p];
         }
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+        Bitmap b = Bitmap.createBitmap(linearLayout.getWidth(), linearLayout.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        linearLayout.draw(c);
+        addData(s, getBytes(b));
+    }
+
+    public void ukuleleRevealName(String type, double r){
+        if (flag)
+            return;
+        String s = "";
+        int p = 0;
+        for(int i = 0; i < rootsVal.length; i++){
+            if(rootsVal[i] == r)
+                p = i;
+        }
+        s += roots[p];
+        s += type;
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
         Bitmap b = Bitmap.createBitmap(linearLayout.getWidth(), linearLayout.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(b);
@@ -486,27 +581,127 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
 
     // Opens the lsat searched activity
     public void openLastSearched(){
-        Intent intent = new Intent(this, GuitarListData.class);
+        Intent intent = new Intent(this, LastSearched.class);
+        intent.putExtra("instrument", current);
         startActivity(intent);
         overridePendingTransition(0, 0);
-        //CustomIntent.customType(this, "left-to-right");
     }
 
-    // Opens the ukulele activity
-    public void openUke(){
-        Intent intent = new Intent(this, UkuleleChordNamer.class);
+    private void setGuitarScreen() {
+        setContentView(R.layout.activity_guitar_chord_namer);
 
-        Pair[] pairs = new Pair[5];
-        pairs[0] = new Pair<View, String>(go, "go");
-        pairs[1] = new Pair<View, String>(fret, "fret");
-        pairs[2] = new Pair<View, String>(options, "options");
-        pairs[3] = new Pair<View, String>(bottomNavigationView, "bottom_bar");
-        //pairs[4] = new Pair<View, String>(linearLayout, "buttons");
-        pairs[4] = new Pair<View, String>(x, "x");
+        // Exclude status and navigation bars as shared elements
+        Transition fade = new Fade();
+        fade.excludeTarget(android.R.id.statusBarBackground, true);
+        fade.excludeTarget(android.R.id.navigationBarBackground, true);
+        getWindow().setExitTransition(fade);
+        getWindow().setEnterTransition(fade);
 
-        ActivityOptions ao = ActivityOptions.makeSceneTransitionAnimation(this, pairs);
+        // Fills the dictionary
+        mapFill();
 
-        startActivity(intent, ao.toBundle());
+        // ----- Adding on click listeners -----
+        rg0 = findViewById(R.id.rg0_2);
+        rg1 = findViewById(R.id.rg1_2);
+        rg2 = findViewById(R.id.rg2_2);
+        rg3 = findViewById(R.id.rg3_2);
+        rg4 = findViewById(R.id.rg4_2);
+        rg5 = findViewById(R.id.rg5_2);
+        groups = new RadioGroup[]{rg0, rg1, rg2, rg3, rg4, rg5};
+
+        linearLayout = findViewById(R.id.r_buttons);
+        x = findViewById(R.id.x2);
+
+        go = findViewById(R.id.go2);
+        go.setOnClickListener(this);
+
+        fret = findViewById(R.id.fret2);
+
+        options = findViewById(R.id.options);
+        options.setOnClickListener(this);
+
+        // The database
+        mdb = new DatabaseHelper(this);
+
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.guitar_selector);
+        bottomNavigationView.setOnNavigationItemSelectedListener(select);
+
+        // Creating the dialog
+        dialog = new Dialog(this);
+        dialog.setContentView(R.layout.options_dialog);
+
+        // ----- Dialog on click listeners -----
+
+        ls = dialog.findViewById(R.id.last_searched_dialog);
+        ls.setOnClickListener(this);
+
+        settings = dialog.findViewById(R.id.settings_dialog);
+        settings.setOnClickListener(this);
+
+        music = dialog.findViewById(R.id.music_dialog);
+        music.setOnCheckedChangeListener(checked);
+
+        // Check if music is playing (if it is turn the switch on)
+        if (isMyServiceRunning(BackgroundSoundService.class))
+            music.setChecked(true);
+
+        current = instruments[0]; // Guitar
+    }
+
+    private void setUkuleleScreen() {
+        setContentView(R.layout.activity_ukulele_chord_namer);
+
+        // Exclude status and navigation bars as shared elements
+        Transition fade = new Fade();
+        fade.excludeTarget(android.R.id.statusBarBackground, true);
+        fade.excludeTarget(android.R.id.navigationBarBackground, true);
+        getWindow().setExitTransition(fade);
+        getWindow().setEnterTransition(fade);
+
+        // Fills the dictionary
+        mapFill();
+
+        // ----- Adding on click listeners -----
+        rg0 = findViewById(R.id.rg0_3);
+        rg1 = findViewById(R.id.rg1_3);
+        rg2 = findViewById(R.id.rg2_3);
+        rg3 = findViewById(R.id.rg3_3);
+        groups = new RadioGroup[]{rg0, rg1, rg2, rg3};
+        linearLayout = findViewById(R.id.r_buttons);
+
+        go = findViewById(R.id.go3);
+        go.setOnClickListener(this);
+        fret = findViewById(R.id.fret3);
+        x = findViewById(R.id.x3);
+        options = findViewById(R.id.options2);
+        options.setOnClickListener(this);
+
+        bottomNavigationView = findViewById(R.id.bottom_ukulele_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.ukulele_selector);
+        bottomNavigationView.setOnNavigationItemSelectedListener(select);
+
+        mdb = new DatabaseHelper(this);
+
+        // Creating the dialog
+        dialog = new Dialog(this);
+        dialog.setContentView(R.layout.options_dialog);
+
+        // ----- Dialog on click listeners -----
+        ls = dialog.findViewById(R.id.last_searched_dialog);
+        ls.setOnClickListener(this);
+
+        settings = dialog.findViewById(R.id.settings_dialog);
+        settings.setOnClickListener(this);
+
+        music = dialog.findViewById(R.id.music_dialog);
+        music.setOnCheckedChangeListener(checked);
+
+        // Check if music is playing (if it is turn the switch on)
+        if (isMyServiceRunning(BackgroundSoundService.class))
+            music.setChecked(true);
+
+        current = instruments[1]; // Ukulele
     }
 
     // Opens the menu
@@ -514,7 +709,6 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
         Intent intent = new Intent(this, Menu.class);
         startActivity(intent);
         overridePendingTransition(0, 0);
-        //CustomIntent.customType(this, "left-to-right");
     }
 
     // Opens the under construction activity
@@ -522,7 +716,6 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
         Intent intent = new Intent(this, UnderConstruction.class);
         startActivity(intent);
         overridePendingTransition(0, 0);
-        //CustomIntent.customType(this, "left-to-right");
     }
 
     // Fills the dictionary
