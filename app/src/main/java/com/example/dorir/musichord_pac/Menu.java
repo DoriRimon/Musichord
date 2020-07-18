@@ -101,7 +101,7 @@ public class Menu extends AppCompatActivity implements View.OnClickListener{
 
     // Opens the chord namer activity
     public void openChordNamer(){
-        Intent intent = new Intent(this, GuitarChordNamer.class);
+        Intent intent = new Intent(this, ChordNamer.class);
         startActivity(intent);
         overridePendingTransition(0, 0);
     }

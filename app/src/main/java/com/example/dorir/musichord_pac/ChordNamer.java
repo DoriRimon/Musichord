@@ -1,10 +1,8 @@
 package com.example.dorir.musichord_pac;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -14,9 +12,7 @@ import android.graphics.Canvas;
 import android.os.Bundle;
 import android.transition.Fade;
 import android.transition.Transition;
-import android.util.Pair;
 import android.view.Gravity;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -38,7 +34,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class GuitarChordNamer extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener{
+public class ChordNamer extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener{
 
     // The dictionary - from chord types names to their values in the A major scale
     private LinkedHashMap<String, double[]> scaling = new LinkedHashMap<>();
@@ -195,7 +191,7 @@ public class GuitarChordNamer extends AppCompatActivity implements View.OnClickL
     CompoundButton.OnCheckedChangeListener checked = (cb, b) -> {
         switch (cb.getId()){
             case R.id.music_dialog:
-                Intent svc = new Intent(GuitarChordNamer.this, BackgroundSoundService.class);
+                Intent svc = new Intent(ChordNamer.this, BackgroundSoundService.class);
                 if (b) {
                     startService(svc);
                 }

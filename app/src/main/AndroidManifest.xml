@@ -18,7 +18,7 @@
             android:screenOrientation="portrait" />
         <activity android:name="com.example.dorir.musichord_pac.LastSearched"
             android:screenOrientation="portrait" />
-        <activity android:name="com.example.dorir.musichord_pac.GuitarChordNamer"
+        <activity android:name="com.example.dorir.musichord_pac.ChordNamer"
             android:screenOrientation="portrait" />
         <activity
             android:name="com.example.dorir.musichord_pac.Intro"
