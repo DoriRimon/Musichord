@@ -11,3 +11,6 @@ Chord Namer allows you to translate a chord's shape ot it's name
 ## Side Notes
 The app is in building process, which means some of the features (including Chord Search, and smaller features
 like settings) are yet to be made, or still under construction
+
+## Credits
+[Intro pages](https://github.com/AppIntro/AppIntro)
