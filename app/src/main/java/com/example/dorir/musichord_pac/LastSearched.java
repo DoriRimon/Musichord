@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public class LastSearched extends AppCompatActivity {
 
 
-    private static final String TAG = "GuitarListData";
+    private static final String TAG = "LastSearched";
     private String instrument;
 
     // The database

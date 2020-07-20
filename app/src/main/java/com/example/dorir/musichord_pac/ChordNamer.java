@@ -36,27 +36,6 @@ import java.util.Map;
 
 public class ChordNamer extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener{
 
-    // The dictionary - from chord types names to their values in the A major scale
-    private LinkedHashMap<String, double[]> scaling = new LinkedHashMap<>();
-
-    // The standard guitar tuning by the number format I created
-    private double[] guitarTuning = new double[] {4.5, 1, 3.5, 6, 2, 4.5};
-
-    // The standard ukulele tuning by the number format I created
-    private double[] ukuleleTuning = new double[] {6, 2.5, 4.5, 1};
-
-    // Contains the A major scale values (in a number format I created)
-    private final double[] originalScale = new double[] { 1.0, 2.0, 3.0, 3.5, 4.5, 5.5, 6.5 };
-
-    // All music notes names
-    private String[] roots = new String[] {"A", "Bb", "B", "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab"};
-
-    // Instruments names
-    private String[] instruments = new String[] {"guitar", "ukulele", "piano"};
-
-    // Values of the notes written above (in the format I mentioned earlier)
-    private double[] rootsVal = new double[] {1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5};
-
     // The values of the section that is relevant at the moment
     private double[][] guitarDiagram = new double[6][6];
     private double[][] ukuleleDiagram = new double[6][4];
@@ -93,9 +72,6 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
     private RadioGroup[] groups;
     private LinearLayout linearLayout;
 
-    // The text view for the little x that shows the open fret
-    private TextView x;
-
     // The dialog that shows the options
     private static Dialog dialog;
 
@@ -109,7 +85,7 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
     private BottomNavigationView bottomNavigationView;
 
     // Current chord
-    private String current = instruments[0]; // Guitar
+    private String current = Globe.instruments[0]; // Guitar
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,7 +100,7 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
         getWindow().setEnterTransition(fade);
 
         // Fills the dictionary
-        mapFill();
+        Globe.mapFill();
 
         // ----- Adding on click listeners -----
         rg0 = findViewById(R.id.rg0_2);
@@ -136,7 +112,6 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
         groups = new RadioGroup[]{rg0, rg1, rg2, rg3, rg4, rg5};
 
         linearLayout = findViewById(R.id.r_buttons);
-        x = findViewById(R.id.x2);
 
         go = findViewById(R.id.go2);
         go.setOnClickListener(this);
@@ -269,7 +244,7 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
     }
 
     // Add data to the database
-    public void addData(String name, byte[] image){
+    public void addData(String name, byte[] image) {
         mdb.addData(name, image, current);
     }
 
@@ -283,7 +258,7 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
     // Fills the diagram with the notes values
     public void guitarDiagramFill(int fret){
         for (int j = 0; j < 6; j++)
-            guitarDiagram[0][j] = guitarTuning[j] + fret * 0.5;
+            guitarDiagram[0][j] = Globe.guitarTuning[j] + fret * 0.5;
         for (int i = 1; i < 6; i++) {
             for (int j = 0; j < 6; j++)
                 guitarDiagram[i][j] = guitarDiagram[i - 1][j] + 0.5;
@@ -292,7 +267,7 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
 
     public void ukuleleDiagramFill(int fret){
         for (int j = 0; j < 4; j++)
-            ukuleleDiagram[0][j] = ukuleleTuning[j] + fret * 0.5;
+            ukuleleDiagram[0][j] = Globe.ukuleleTuning[j] + fret * 0.5;
         for (int i = 1; i < 6; i++) {
             for (int j = 0; j < 4; j++)
                 ukuleleDiagram[i][j] = ukuleleDiagram[i - 1][j] + 0.5;
@@ -388,12 +363,12 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
     public double[] actualChord(String instrument){
         int f = Integer.parseInt(fret.getText().toString());
         double[] choices = new double[]{};
-        if (instrument.equals(instruments[0])) { //Guitar
+        if (instrument.equals(Globe.instruments[0])) { //Guitar
             guitarDiagramFill(f);
             guitarChoicesFill();
             choices = guitarChoices;
         }
-        if (instrument.equals(instruments[1])) { // Ukulele
+        if (instrument.equals(Globe.instruments[1])) { // Ukulele
             ukuleleDiagramFill(f);
             ukuleleChoicesFill();
             choices = ukuleleChoices;
@@ -420,7 +395,7 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
 
     // Checks if the chord is valid
     public void guitarNamePrint() {
-        double[] chord = actualChord(instruments[0]); // Guitar
+        double[] chord = actualChord(Globe.instruments[0]); // Guitar
         flag = false;
         double root;
         double baseNote;
@@ -449,7 +424,7 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
     }
 
     public void ukuleleNamePrint() {
-        double[] chord = actualChord(instruments[1]); // Ukulele
+        double[] chord = actualChord(Globe.instruments[1]); // Ukulele
         flag = false;
         double root;
         if (chord.length != 0) {
@@ -513,19 +488,19 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
     public void guitarRevealName(String type, double root, double baseNote){
         String s = "";
         int p = 0;
-        for(int i = 0; i < rootsVal.length; i++){
-            if(rootsVal[i] == root)
+        for(int i = 0; i < Globe.rootsVal.length; i++){
+            if(Globe.rootsVal[i] == root)
                 p = i;
         }
-        s += roots[p];
+        s += Globe.roots[p];
         s += type;
         if (baseNote != root){
             p = 0;
-            for (int i = 0; i < rootsVal.length; i++){
-                if (rootsVal[i] == baseNote)
+            for (int i = 0; i < Globe.rootsVal.length; i++){
+                if (Globe.rootsVal[i] == baseNote)
                     p = i;
             }
-            s += "/" + roots[p];
+            s += "/" + Globe.roots[p];
         }
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
         Bitmap b = Bitmap.createBitmap(linearLayout.getWidth(), linearLayout.getHeight(), Bitmap.Config.ARGB_8888);
@@ -539,11 +514,11 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
             return;
         String s = "";
         int p = 0;
-        for(int i = 0; i < rootsVal.length; i++){
-            if(rootsVal[i] == r)
+        for(int i = 0; i < Globe.rootsVal.length; i++){
+            if(Globe.rootsVal[i] == r)
                 p = i;
         }
-        s += roots[p];
+        s += Globe.roots[p];
         s += type;
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
         Bitmap b = Bitmap.createBitmap(linearLayout.getWidth(), linearLayout.getHeight(), Bitmap.Config.ARGB_8888);
@@ -565,22 +540,14 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
     }
 
     // Searches the chord in the dictionary
-    public String mapSearch(double[] chord){
+    public String mapSearch(double[] chord) {
         //double[] newChord = osc(chord, root);
         //Toast.makeText(this, Arrays.toString(newChord), Toast.LENGTH_SHORT).show();
-        for(Map.Entry<String, double[]> entry : scaling.entrySet()) {
-            if(Arrays.equals(chord, entry.getValue()))
+        for (Map.Entry<String, double[]> entry : Globe.scaling.entrySet()) {
+            if (Arrays.equals(chord, entry.getValue()))
                 return entry.getKey();
         }
         return "none";
-    }
-
-    // Opens the lsat searched activity
-    public void openLastSearched(){
-        Intent intent = new Intent(this, LastSearched.class);
-        intent.putExtra("instrument", current);
-        startActivity(intent);
-        overridePendingTransition(0, 0);
     }
 
     private void setGuitarScreen() {
@@ -593,9 +560,6 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
         getWindow().setExitTransition(fade);
         getWindow().setEnterTransition(fade);
 
-        // Fills the dictionary
-        mapFill();
-
         // ----- Adding on click listeners -----
         rg0 = findViewById(R.id.rg0_2);
         rg1 = findViewById(R.id.rg1_2);
@@ -606,7 +570,6 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
         groups = new RadioGroup[]{rg0, rg1, rg2, rg3, rg4, rg5};
 
         linearLayout = findViewById(R.id.r_buttons);
-        x = findViewById(R.id.x2);
 
         go = findViewById(R.id.go2);
         go.setOnClickListener(this);
@@ -642,7 +605,7 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
         if (isMyServiceRunning(BackgroundSoundService.class))
             music.setChecked(true);
 
-        current = instruments[0]; // Guitar
+        current = Globe.instruments[0]; // Guitar
     }
 
     private void setUkuleleScreen() {
@@ -655,9 +618,6 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
         getWindow().setExitTransition(fade);
         getWindow().setEnterTransition(fade);
 
-        // Fills the dictionary
-        mapFill();
-
         // ----- Adding on click listeners -----
         rg0 = findViewById(R.id.rg0_3);
         rg1 = findViewById(R.id.rg1_3);
@@ -669,7 +629,6 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
         go = findViewById(R.id.go3);
         go.setOnClickListener(this);
         fret = findViewById(R.id.fret3);
-        x = findViewById(R.id.x3);
         options = findViewById(R.id.options2);
         options.setOnClickListener(this);
 
@@ -697,7 +656,7 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
         if (isMyServiceRunning(BackgroundSoundService.class))
             music.setChecked(true);
 
-        current = instruments[1]; // Ukulele
+        current = Globe.instruments[1]; // Ukulele
     }
 
     // Opens the menu
@@ -714,58 +673,11 @@ public class ChordNamer extends AppCompatActivity implements View.OnClickListene
         overridePendingTransition(0, 0);
     }
 
-    // Fills the dictionary
-    public void mapFill(){
-        scaling.put("", new double[]{originalScale[0], originalScale[2], originalScale[4]});
-        scaling.put("major", new double[]{originalScale[0], originalScale[2], originalScale[4]});
-        scaling.put("5", new double[]{originalScale[0], originalScale[4]});
-        scaling.put("sus4", new double[]{originalScale[0], originalScale[3], originalScale[4]});
-        scaling.put("sus2", new double[]{originalScale[0], originalScale[1], originalScale[4]});
-        scaling.put("add9", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[1]}); //9
-        scaling.put("6", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[5]});
-        scaling.put("6/9", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[6], originalScale[1]}); //9
-        scaling.put("maj7", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[6]});
-        scaling.put("maj9", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[6], originalScale[1]}); //9
-        scaling.put("maj7#11", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[6], originalScale[3] + 0.5}); //11
-        scaling.put("maj13", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[6], originalScale[1], originalScale[5]}); //9, 13
-        scaling.put("m", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4]});
-        scaling.put("minor", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4]});
-        scaling.put("m(add9)", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4], originalScale[1]}); //9
-        scaling.put("m6", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4], originalScale[5]});
-        scaling.put("mb6", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4], originalScale[5] - 0.5});
-        scaling.put("m6/9", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4], originalScale[5], originalScale[1]}); //9
-        scaling.put("m7", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4], originalScale[6] - 0.5});
-        scaling.put("m7b5", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4] - 0.5, originalScale[6] - 0.5});
-        scaling.put("m(maj7)", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4], originalScale[6]});
-        scaling.put("m9", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4], originalScale[6] - 0.5, originalScale[1]}); //9
-        scaling.put("m9b5", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4] - 0.5, originalScale[6] - 0.5, originalScale[1]}); //9
-        scaling.put("m9(maj7)", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4], originalScale[6], originalScale[1]}); //9
-        scaling.put("m11", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4], originalScale[6] - 0.5, originalScale[1], originalScale[3]}); //9, 11
-        // not guitar oriented: scaling.put("m13", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4], originalScale[6] - 0.5, originalScale[1], originalScale[3], originalScale[5]}); //9, 11, 13
-        scaling.put("7", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[6] - 0.5});
-        scaling.put("7sus4", new double[]{originalScale[0], originalScale[3], originalScale[4], originalScale[6] - 0.5});
-        scaling.put("7b5", new double[]{originalScale[0], originalScale[2], originalScale[4] - 0.5, originalScale[6] - 0.5});
-        scaling.put("9", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[6] - 0.5, originalScale[1]}); //9
-        scaling.put("9sus4", new double[]{originalScale[0], originalScale[3], originalScale[4], originalScale[6] - 0.5, originalScale[1]}); //9
-        scaling.put("9b5", new double[]{originalScale[0], originalScale[2], originalScale[4] - 0.5, originalScale[6] - 0.5, originalScale[1]}); //9
-        scaling.put("7b9", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[6] - 0.5, originalScale[1] - 0.5}); //9
-        scaling.put("7#9", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[6] - 0.5, originalScale[1] + 0.5}); //9
-        scaling.put("7b5(#9)", new double[]{originalScale[0], originalScale[2], originalScale[4] - 0.5, originalScale[6] - 0.5, originalScale[1] + 0.5}); //9
-        scaling.put("11", new double[]{originalScale[0], originalScale[4], originalScale[6] - 0.5, originalScale[1], originalScale[3]}); //9, 11
-        scaling.put("7#11", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[6] - 0.5, originalScale[3] + 0.5});
-        scaling.put("13", new double[]{originalScale[0], originalScale[2], originalScale[4], originalScale[6] - 0.5, originalScale[1], originalScale[5]}); //9, 13
-        scaling.put("13sus4", new double[]{originalScale[0], originalScale[3], originalScale[4], originalScale[6] - 0.5, originalScale[1], originalScale[5]}); //9, 13
-        scaling.put("aug", new double[]{originalScale[0], originalScale[2], originalScale[4] + 0.5});
-        scaling.put("+", new double[]{originalScale[0], originalScale[2], originalScale[4] + 0.5});
-        scaling.put("aug7", new double[]{originalScale[0], originalScale[2], originalScale[4] + 0.5, originalScale[6] - 0.5});
-        scaling.put("+7", new double[]{originalScale[0], originalScale[2], originalScale[4] + 0.5, originalScale[6] - 0.5});
-        scaling.put("aug9", new double[]{originalScale[0], originalScale[2], originalScale[4] + 0.5, originalScale[6] - 0.5, originalScale[1]}); //9
-        scaling.put("+9", new double[]{originalScale[0], originalScale[2], originalScale[4] + 0.5, originalScale[6] - 0.5, originalScale[1]}); //9
-        scaling.put("aug7b9", new double[]{originalScale[0], originalScale[2], originalScale[4] + 0.5, originalScale[6] - 0.5, originalScale[1] - 0.5}); //9
-        scaling.put("+7b9", new double[]{originalScale[0], originalScale[2], originalScale[4] + 0.5, originalScale[6] - 0.5, originalScale[1] - 0.5}); //9
-        scaling.put("aug7#9", new double[]{originalScale[0], originalScale[2], originalScale[4] + 0.5, originalScale[6] - 0.5, originalScale[1] + 0.5}); //9
-        scaling.put("+7#9", new double[]{originalScale[0], originalScale[2], originalScale[4] + 0.5, originalScale[6] - 0.5, originalScale[1] + 0.5}); //9
-        scaling.put("dim", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4] - 0.5});
-        scaling.put("dim7", new double[]{originalScale[0], originalScale[2] - 0.5, originalScale[4] - 0.5, originalScale[6] - 1});
+    // Opens the lsat searched activity
+    public void openLastSearched(){
+        Intent intent = new Intent(this, LastSearched.class);
+        intent.putExtra("instrument", current);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
     }
 }

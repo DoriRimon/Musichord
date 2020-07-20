@@ -47,10 +47,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public boolean addData(String item, byte[] image, String instrument){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        if (instrument.equals("guitar"))
-            contentValues.put(COL0, 0);
-        if (instrument.equals("ukulele"))
-            contentValues.put(COL0, 1);
+        for (int i = 0; i < Globe.instruments.length; i++)
+            if (instrument.equals(Globe.instruments[i])) {
+                contentValues.put(COL0, i);
+                break;
+            }
         contentValues.put(COL1, item);
         contentValues.put(COL2, image);
 
@@ -64,10 +65,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getData(String instrument){
         int x = -1;
-        if (instrument.equals("guitar"))
-            x = 0;
-        if (instrument.equals("ukulele"))
-            x = 1;
+        for (int i = 0; i < Globe.instruments.length; i++)
+            if (instrument.equals(Globe.instruments[i])) {
+                x = i;
+                break;
+            }
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + COL0 + "= " + x;
         Cursor data = db.rawQuery(query, null);
