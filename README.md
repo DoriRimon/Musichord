@@ -6,7 +6,7 @@ Chord Search allows you to translate a chord's name to its shape on your instrum
 multiple ways to be played on an instrument, therfore you can see all the possible ways to play the chord)
 
 ## Chord Namer
-Chord Namer allows you to translate a chord's shape ot it's name
+Chord Namer allows you to translate a chord's shape to it's name
 
 ## Side Notes
 The app is in building process, which means some of the features (including Chord Search, and smaller features
