@@ -1,8 +1,11 @@
 # Musichord
-Musichord is an app for musicians, made as a dictionary between chord names and shapes. <br> <br>
 <p align="center">
   <img src="https://github.com/DoriRimon/Musichord/blob/master/readme_files/icon.jpg" width="40%">
 </p>
+
+
+## What is Musichord?
+Musichord is an app for musicians, made as a dictionary between chord names and shapes.
 
 ## Chord Search
 Chord Search allows you to translate a chord's name to its shape on your instrument (Usually a chord has 
